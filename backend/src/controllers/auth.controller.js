@@ -1,3 +1,5 @@
+import { User } from "../models/user.model.js";
+
 export const authCallback = async (req, res) => {
   try {
     const { id, firstName, lastName, imageUrl } = req.body;

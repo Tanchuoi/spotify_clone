@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import { clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./lib/db.js";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
@@ -14,6 +15,8 @@ dotenv.config();
 const app = express();
 
 app.use(express.json()); // for parsing application/json
+app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(clerkMiddleware());
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
