@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
+import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./lib/db.js";
 import fileUpload from "express-fileupload";
@@ -17,6 +18,12 @@ dotenv.config();
 
 const app = express();
 
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(clerkMiddleware()); // add auth to req object -> req.auth
