@@ -1,30 +1,72 @@
+import axiosInstance from "@/lib/axios";
+import { Album, Song, Stats } from "@/types";
+// import toast from "react-hot-toast";
 import { create } from "zustand";
-import axiosInstance from "../lib/axios";
-import { Album, Song } from "@/types/index";
 
 interface MusicStore {
   songs: Song[];
   albums: Album[];
   isLoading: boolean;
   error: string | null;
-  fetchSongs: () => Promise<void>;
+  currentAlbum: Album | null;
+  featuredSongs: Song[];
+  madeForYouSongs: Song[];
+  trendingSongs: Song[];
+  stats: Stats;
+
   fetchAlbums: () => Promise<void>;
+  fetchAlbumById: (id: string) => Promise<void>;
+  fetchSongs: () => Promise<void>;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
-  songs: [],
   albums: [],
+  songs: [],
   isLoading: false,
   error: null,
+  currentAlbum: null,
+  madeForYouSongs: [],
+  featuredSongs: [],
+  trendingSongs: [],
+  stats: {
+    totalSongs: 0,
+    totalAlbums: 0,
+    totalUsers: 0,
+    totalArtists: 0,
+  },
 
-  fetchSongs: async () => {},
+  fetchSongs: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.get("/songs");
+      set({ songs: response.data });
+    } catch (error: any) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   fetchAlbums: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
+
     try {
       const response = await axiosInstance.get("/albums");
       set({ albums: response.data });
     } catch (error: any) {
-      set({ error });
+      set({ error: error.response.data.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchAlbumById: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.get(`/albums/${id}`);
+      set({ currentAlbum: response.data });
+    } catch (error: any) {
+      set({ error: error.response.data.message });
     } finally {
       set({ isLoading: false });
     }
