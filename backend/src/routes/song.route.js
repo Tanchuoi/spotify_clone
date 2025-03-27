@@ -16,13 +16,16 @@ import {
 
 const router = Router();
 
+// Specific routes first
+router.get("/featured", getAllFeaturedSongs);
+router.get("/trending", getAllTrendingSongs);
+router.get("/made-for-you", getAllMadeForYouSongs);
+
+// Parameterized routes after
 router.get("/", isAuthMiddleware, isAdminMiddleware, getAllSongs);
 router.get("/:id", getSongById);
 router.post("/", createSong);
 router.put("/:id", updateSong);
 router.delete("/:id", deleteSong);
-router.get("/featured", getAllFeaturedSongs);
-router.get("/trending", getAllTrendingSongs);
-router.get("/made-for-you", getAllMadeForYouSongs);
 
 export default router;

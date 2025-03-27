@@ -1,6 +1,6 @@
 import { Song } from "../models/song.model.js";
 
-export const getAllSongs = async (req, res) => {
+export const getAllSongs = async (req, res, next) => {
   try {
     const songs = await Song.find().sort({ createdAt: -1 });
     res.status(200).json(songs);
@@ -9,9 +9,10 @@ export const getAllSongs = async (req, res) => {
   }
 };
 
-export const getAllFeaturedSongs = async (req, res) => {
+export const getAllFeaturedSongs = async (req, res, next) => {
+  console.log("Received request for /api/songs/featured"); // Debugging log
+
   try {
-    // fetch 6 random songs
     const songs = await Song.aggregate([
       { $sample: { size: 6 } },
       {
@@ -24,13 +25,16 @@ export const getAllFeaturedSongs = async (req, res) => {
         },
       },
     ]);
+
+    console.log("Songs retrieved:", songs); // Debugging log
     res.status(200).json(songs);
   } catch (error) {
-    next(error);
+    console.error("Error in getAllFeaturedSongs:", error);
+    res.status(500).json({ message: "Internal server error", error });
   }
 };
 
-export const getAllMadeForYouSongs = async (req, res) => {
+export const getAllMadeForYouSongs = async (req, res, next) => {
   try {
     const songs = await Song.aggregate([
       { $sample: { size: 4 } },
@@ -50,7 +54,7 @@ export const getAllMadeForYouSongs = async (req, res) => {
   }
 };
 
-export const getAllTrendingSongs = async (req, res) => {
+export const getAllTrendingSongs = async (req, res, next) => {
   try {
     const songs = await Song.aggregate([
       { $sample: { size: 8 } },
