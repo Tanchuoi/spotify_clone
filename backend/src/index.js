@@ -4,7 +4,6 @@ import { fileURLToPath } from "url";
 import path from "path";
 import cors from "cors";
 import fs from "fs";
-
 import { clerkMiddleware } from "@clerk/express";
 import { createServer } from "http";
 import { initializeSocket } from "./lib/socket.js";
@@ -78,11 +77,10 @@ app.use("/api/stats", statRoutes);
 
 if (process.env.NODE_ENV === "production") {
   // Serve static files from the React frontend app
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.use(express.static(path.join(__dirname, "public")));
 
-  // Handle React routing, return all requests to React app
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+    res.sendFile(path.resolve(__dirname, "public", "index.html"));
   });
 }
 
