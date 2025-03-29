@@ -3,8 +3,11 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
 import cors from "cors";
-import { clerkClient, clerkMiddleware } from "@clerk/express";
+import { clerkMiddleware } from "@clerk/express";
+import { createServer } from "http";
+import { initializeSocket } from "./lib/socket.js";
 import { connectDB } from "./lib/db.js";
+import cron from "node-cron";
 import fileUpload from "express-fileupload";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
@@ -17,6 +20,9 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 const app = express();
+
+const httpServer = createServer(app);
+initializeSocket(httpServer);
 
 // Enable CORS with credentials
 app.use(
@@ -46,6 +52,20 @@ app.use(
   })
 );
 
+const tempDir = path.join(process.cwd(), "/tmp");
+
+// delete temp files every hour
+cron.schedule("0 * * * *", () => {
+  fs.readdir(tempDir, (err, files) => {
+    if (err) throw err;
+    files.forEach((file) => {
+      fs.unlink(path.join(tempDir, file), (err) => {
+        if (err) throw err;
+      });
+    });
+  });
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -53,6 +73,16 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/songs", songRoutes);
 app.use("/api/albums", albumRoutes);
 app.use("/api/stats", statRoutes);
+
+if (process.env.NODE_ENV === "production") {
+  // Serve static files from the React frontend app
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  // Handle React routing, return all requests to React app
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+  });
+}
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -65,7 +95,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log("Server running on port " + PORT);
   connectDB();
 });

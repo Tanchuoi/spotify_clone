@@ -6,6 +6,7 @@ import MainLayout from "./layout/MainLayout";
 import ChatPage from "./pages/chat/ChatPage";
 import AlbumPage from "./pages/album/AlbumPage";
 import AdminPage from "./pages/admin/AdminPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import { Toaster } from "react-hot-toast";
 
 function App() {
@@ -30,7 +31,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
         </Route>
 
-        <Route path="*" element={<div>Not Found</div>} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
