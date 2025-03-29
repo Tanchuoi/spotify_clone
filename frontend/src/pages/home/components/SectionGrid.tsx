@@ -1,15 +1,23 @@
 import { Song } from "@/types";
 import SectionGridSkeleton from "./SectionGridSkeleton";
 import { Button } from "@/components/ui/button";
-// import PlayButton from "./PlayButton";
+import PlayButton from "./PlayButton";
+import { usePlayerStore } from "@/stores/usePlayerStore";
 
 type SectionGridProps = {
   title: string;
   songs: Song[];
   isLoading: boolean;
 };
+
 const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
+  const { setCurrentSong } = usePlayerStore();
+
   if (isLoading) return <SectionGridSkeleton />;
+
+  const handleSongClick = (song: Song) => {
+    setCurrentSong(song);
+  };
 
   return (
     <div className="mb-8">
@@ -27,7 +35,8 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
         {songs.map((song) => (
           <div
             key={song._id}
-            className="bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer"
+            onClick={() => handleSongClick(song)}
+            className="bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer relative"
           >
             <div className="relative mb-4">
               <div className="aspect-square rounded-md shadow-lg overflow-hidden">
@@ -35,10 +44,12 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
                   src={song.imageUrl}
                   alt={song.title}
                   className="w-full h-full object-cover transition-transform duration-300 
-									group-hover:scale-105"
+                  group-hover:scale-105"
                 />
               </div>
-              {/* <PlayButton song={song} /> */}
+              <div onClick={(e) => e.stopPropagation()}>
+                <PlayButton song={song} />
+              </div>
             </div>
             <h3 className="font-medium mb-2 truncate">{song.title}</h3>
             <p className="text-sm text-zinc-400 truncate">{song.artist}</p>
@@ -48,4 +59,5 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
     </div>
   );
 };
+
 export default SectionGrid;

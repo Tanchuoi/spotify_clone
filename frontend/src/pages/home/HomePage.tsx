@@ -1,51 +1,66 @@
-import { useEffect } from "react";
-import { useMusicStore } from "@/stores/useMusicStore";
 import Topbar from "@/components/Topbar";
+import { useMusicStore } from "@/stores/useMusicStore";
+import { useEffect } from "react";
 import FeaturedSection from "./components/FeaturedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
+import { usePlayerStore } from "@/stores/usePlayerStore";
 
 const HomePage = () => {
   const {
+    fetchFeaturedSongs,
+    fetchMadeForYouSongs,
+    fetchTrendingSongs,
+    isLoading,
+    madeForYouSongs,
     featuredSongs,
     trendingSongs,
-    madeForYouSongs,
-    isLoading,
-    fetchFeaturedSongs,
-    fetchTrendingSongs,
-    fetchMadeForYouSongs,
   } = useMusicStore();
+
+  const { initializeQueue } = usePlayerStore();
 
   useEffect(() => {
     fetchFeaturedSongs();
-    fetchTrendingSongs();
     fetchMadeForYouSongs();
-  }, [fetchFeaturedSongs, fetchTrendingSongs, fetchMadeForYouSongs]);
+    fetchTrendingSongs();
+  }, [fetchFeaturedSongs, fetchMadeForYouSongs, fetchTrendingSongs]);
 
-  console.log({ featuredSongs, trendingSongs, madeForYouSongs, isLoading });
+  useEffect(() => {
+    if (
+      madeForYouSongs.length > 0 &&
+      featuredSongs.length > 0 &&
+      trendingSongs.length > 0
+    ) {
+      const allSongs = [...featuredSongs, ...madeForYouSongs, ...trendingSongs];
+      initializeQueue(allSongs);
+    }
+  }, [initializeQueue, madeForYouSongs, trendingSongs, featuredSongs]);
 
   return (
-    <main className="round-md overflow-hidden h-full bg-gradient-to-b from-zinc-900 to to-zinc-800 ">
+    <main className="rounded-md overflow-hidden h-full bg-gradient-to-b from-zinc-800 to-zinc-900">
       <Topbar />
-      <ScrollArea className="h-[calc(100vh-180px)] px-4">
-        <h1 className="text-2xl sm:text-3xl font-bold my-6 ">Good Afternoon</h1>
-        <FeaturedSection />
+      <ScrollArea className="h-[calc(100vh-180px)]">
+        <div className="p-4 sm:p-6">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6">
+            Good afternoon
+          </h1>
+          <FeaturedSection />
 
-        <div className="">
-          <SectionGrid
-            songs={madeForYouSongs}
-            title="Made For You"
-            isLoading={isLoading}
-          />
-          <SectionGrid
-            songs={trendingSongs}
-            title="Trending"
-            isLoading={isLoading}
-          />
+          <div className="space-y-8">
+            <SectionGrid
+              title="Made For You"
+              songs={madeForYouSongs}
+              isLoading={isLoading}
+            />
+            <SectionGrid
+              title="Trending"
+              songs={trendingSongs}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </ScrollArea>
     </main>
   );
 };
-
 export default HomePage;
