@@ -77,10 +77,9 @@ app.use("/api/stats", statRoutes);
 
 if (process.env.NODE_ENV === "production") {
   // Serve static files from the React frontend app
-  app.use(express.static(path.join(__dirname, "public")));
-
+  app.use(express.static(path.join(__dirname, "../public")));
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "public", "index.html"));
+    res.sendFile(path.resolve(__dirname, "../public", "index.html"));
   });
 }
 
