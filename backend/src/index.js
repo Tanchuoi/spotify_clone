@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
 import cors from "cors";
+import fs from "fs";
+
 import { clerkMiddleware } from "@clerk/express";
 import { createServer } from "http";
 import { initializeSocket } from "./lib/socket.js";

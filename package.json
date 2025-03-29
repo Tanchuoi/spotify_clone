@@ -4,7 +4,7 @@
   "description": "A spotify clone app for learning purpose Frontend: React, Zustand, Typescript, Tailwind, Shadcn. Backend: ExpressJS, MongoDB, Mongoose, Clerk, Cloudinary, SocketIO.",
   "main": "index.js",
   "scripts": {
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend && if not exist backend\\public mkdir backend\\public && xcopy /E /I /Y frontend\\dist backend\\public",
     "start": "npm start --prefix backend"
   },
   "keywords": [],
