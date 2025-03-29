@@ -9,14 +9,12 @@ import PlaylistSkeleton from "@/components/skeletons/PlaylistSkeleton";
 import { useEffect } from "react";
 
 const LeftSidebar = () => {
-  const { songs, albums, isLoading, fetchSongs, fetchAlbums } = useMusicStore();
+  const { albums, isLoading, fetchSongs, fetchAlbums } = useMusicStore();
 
   useEffect(() => {
     fetchAlbums();
     fetchSongs();
   }, [fetchAlbums, fetchSongs]);
-
-  console.log(songs, albums);
 
   return (
     <div className="h-full flex flex-col gap-2">

@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
 import cors from "cors";
-import { clerkMiddleware } from "@clerk/express";
+import { clerkClient, clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./lib/db.js";
 import fileUpload from "express-fileupload";
 import userRoutes from "./routes/user.route.js";
@@ -18,19 +18,25 @@ dotenv.config();
 
 const app = express();
 
+// Enable CORS with credentials
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
-app.use(express.json()); // for parsing application/json
-app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-app.use(clerkMiddleware()); // add auth to req object -> req.auth
+
+// Initialize Clerk middleware
+app.use(clerkMiddleware());
+
+// Parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// File upload middleware
 app.use(
   fileUpload({
     useTempFiles: true,
@@ -40,8 +46,9 @@ app.use(
   })
 );
 
-app.use("/api/users", userRoutes);
+// Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/songs", songRoutes);
 app.use("/api/albums", albumRoutes);
@@ -49,6 +56,7 @@ app.use("/api/stats", statRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
+  console.error("Global error handler:", err);
   res.status(500).json({
     message:
       process.env.NODE_ENV === "production"

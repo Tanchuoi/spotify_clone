@@ -4,18 +4,28 @@ import { User } from "../models/user.model.js";
 
 export const getStats = async (req, res, next) => {
   try {
-    const [totalSongs, totalAlbums, totalUsers, totalArtist] =
+    const [totalSongs, totalAlbums, totalUsers, uniqueArtists] =
       await Promise.all([
         Song.countDocuments(),
         Album.countDocuments(),
         User.countDocuments(),
-        Song.distinct("artist").count(),
+        Song.aggregate([
+          {
+            $group: {
+              _id: "$artist",
+            },
+          },
+          {
+            $count: "total",
+          },
+        ]).then((result) => result[0]?.total || 0),
       ]);
+
     res.status(200).json({
       totalSongs,
       totalAlbums,
       totalUsers,
-      totalArtist,
+      totalArtists: uniqueArtists,
     });
   } catch (error) {
     next(error);

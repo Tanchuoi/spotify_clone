@@ -19,20 +19,22 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Get the session token
         const token = await getToken();
+        console.log("Got token:", token ? "Token exists" : "No token");
         updateApiToken(token);
         if (token) {
           await checkAdminStatus();
         }
       } catch (error) {
-        console.error(error);
+        console.error("Auth error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     initAuth();
-  }, [getToken]);
+  }, [getToken, checkAdminStatus]);
 
   if (loading)
     return (
@@ -43,4 +45,5 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+
 export default AuthProvider;

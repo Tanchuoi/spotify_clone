@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios";
 import { Album, Song, Stats } from "@/types";
-// import toast from "react-hot-toast";
+import toast from "react-hot-toast";
 import { create } from "zustand";
 
 interface MusicStore {
@@ -16,10 +16,15 @@ interface MusicStore {
 
   fetchAlbums: () => Promise<void>;
   fetchAlbumById: (id: string) => Promise<void>;
-  fetchSongs: () => Promise<void>;
   fetchFeaturedSongs: () => Promise<void>;
   fetchMadeForYouSongs: () => Promise<void>;
   fetchTrendingSongs: () => Promise<void>;
+  fetchStats: () => Promise<void>;
+  fetchSongs: () => Promise<void>;
+  deleteSong: (id: string) => Promise<void>;
+  deleteAlbum: (id: string) => Promise<void>;
+  createSong: (formData: FormData) => Promise<void>;
+  createAlbum: (formData: FormData) => Promise<void>;
 }
 
 export const useMusicStore = create<MusicStore>((set) => ({
@@ -38,11 +43,60 @@ export const useMusicStore = create<MusicStore>((set) => ({
     totalArtists: 0,
   },
 
+  deleteSong: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await axiosInstance.delete(`/admin/songs/${id}`);
+
+      set((state) => ({
+        songs: state.songs.filter((song) => song._id !== id),
+      }));
+      toast.success("Song deleted successfully");
+    } catch (error: any) {
+      console.log("Error in deleteSong", error);
+      toast.error("Error deleting song");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteAlbum: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await axiosInstance.delete(`/admin/albums/${id}`);
+      set((state) => ({
+        albums: state.albums.filter((album) => album._id !== id),
+        songs: state.songs.map((song) =>
+          song.albumId === state.albums.find((a) => a._id === id)?.title
+            ? { ...song, album: null }
+            : song
+        ),
+      }));
+      toast.success("Album deleted successfully");
+    } catch (error: any) {
+      toast.error("Failed to delete album: " + error.message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   fetchSongs: async () => {
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get("/songs");
       set({ songs: response.data });
+    } catch (error: any) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchStats: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.get("/stats");
+      set({ stats: response.data });
     } catch (error: any) {
       set({ error: error.message });
     } finally {
@@ -79,10 +133,8 @@ export const useMusicStore = create<MusicStore>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get("/songs/featured");
-      console.log("Featured songs loaded:", response.data);
       set({ featuredSongs: response.data });
     } catch (error: any) {
-      console.error("Error loading featured songs:", error);
       set({ error: error.response.data.message });
     } finally {
       set({ isLoading: false });
@@ -93,10 +145,8 @@ export const useMusicStore = create<MusicStore>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get("/songs/made-for-you");
-      console.log("Made for you songs loaded:", response.data);
       set({ madeForYouSongs: response.data });
     } catch (error: any) {
-      console.error("Error loading made for you songs:", error);
       set({ error: error.response.data.message });
     } finally {
       set({ isLoading: false });
@@ -107,11 +157,47 @@ export const useMusicStore = create<MusicStore>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await axiosInstance.get("/songs/trending");
-      console.log("Trending songs loaded:", response.data);
       set({ trendingSongs: response.data });
     } catch (error: any) {
-      console.error("Error loading trending songs:", error);
       set({ error: error.response.data.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  createSong: async (formData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.post("/admin/songs", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      set((state) => ({
+        songs: [...state.songs, response.data],
+      }));
+      toast.success("Song created successfully");
+    } catch (error: any) {
+      toast.error("Failed to create song: " + error.message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  createAlbum: async (formData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await axiosInstance.post("/admin/albums", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      set((state) => ({
+        albums: [...state.albums, response.data],
+      }));
+      toast.success("Album created successfully");
+    } catch (error: any) {
+      toast.error("Failed to create album: " + error.message);
     } finally {
       set({ isLoading: false });
     }
